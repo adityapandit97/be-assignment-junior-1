@@ -1,0 +1,37 @@
+.modal.fade#expenseModal aria-hidden="true" aria-labelledby="expenseModalLabel" tabindex="-1"
+  .modal-dialog
+    .modal-content
+      .modal-header
+        h5.modal-title#expenseModalLabel Add an expense
+        button.btn-close aria-label="Close" data-bs-dismiss="modal" type="button"
+      .modal-body
+        form method="post" action="/add_expense"
+          label.form-label for="paidBy" Paid By
+          select.form-select#paidBy(name="paid_by" disabled)
+            option(value=current_user.id)= current_user.name
+          input(type="hidden" name="paid_by" value=current_user.id)
+          .mb-3
+            label.form-label for="expenseAmount" Amount
+            input.form-control#expenseAmount(type="number" name="expense_amount")
+          .mb-3
+            label.form-label Shared Equally
+            .form-check
+              input.form-check-input#sharedEqually1(type="radio" name="shared_equally" value="1")
+              label.form-check-label(for="sharedEqually1") Yes
+            .form-check
+              input.form-check-input#sharedEqually0(type="radio" name="shared_equally" value="0")
+              label.form-check-label(for="sharedEqually0") No
+          .mb-3
+            label.form-label for="expenseDate" Date
+            div.input-group
+              input.form-control#expenseDate(type="date" name="expense_date")
+              span.input-group-text
+                i.bi.bi-calendar 
+          .mb-3
+            label.form-label for="expenseDescription" Description
+            input.form-control#expenseDescription(type="text" name="expense_description")
+          #dynamicFieldsContainer
+          button.btn.btn-primary#addUserButton(type="button") Add User
+          button.btn.btn-primary(type="submit") Save Expense
+      .modal-footer
+        button.btn.btn-secondary(type="button" data-bs-dismiss="modal") Close

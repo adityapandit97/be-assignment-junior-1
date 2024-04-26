@@ -1,0 +1,27 @@
+.dashboard-wrapper style="margin-top: 100px;"
+  aside.side-bar-area
+    .friends-list
+      p.friends-list-header FRIENDS
+      - @user.friends.each do |user|
+        a.friend-name href="#"= user.name
+  .main-area
+    .top-bar
+      h1.top-bar-title= link_to "Dashboard", root_path, style: "text-decoration: none; color: black;"
+      .top-bar-actions
+        button.btn.btn-primary type="button" Add an expense
+        button.btn.btn-secondary type="button" Settle up
+    .expenses-list
+      - @expenses_share.each do |share|
+        .expense-item
+          .item-lhs
+            - date = Expense.find(share.first.expense_id).date
+            p= date.strftime("%d %B")
+            p= share.first.item_name
+          .item-rhs
+            .you-details
+              p you paid
+              p= "$ #{share.last}"
+            .you-details
+              p= "you lent #{@user.name}"
+              p= "$ #{share.first.amount}"
+          button.remove-btn ❌

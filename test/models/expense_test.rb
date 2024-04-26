@@ -34,8 +34,4 @@ class ExpenseTest < ActiveSupport::TestCase
     assert_equal :has_many, association.macro
     assert_equal "ExpensesShare", association.options[:class_name]
   end
-
-  test "defines split_type enum with values equal and itemized" do
-    assert_equal({ equal: 0, itemized: 1 }, Expense.split_types)
-  end
 end

@@ -1,0 +1,116 @@
+.dashboard-wrapper style="margin-top:100px;"
+  aside.side-bar-area
+    .friends-list
+      p.friends-list-header FRIENDS
+      - @user.friends.each do |user|
+        a.friend-name href="people/#{user.id}"= user.name
+    = link_to "Add friends", "#", class: "btn btn-primary", data: { bs_toggle: "modal", bs_target: "#friendsModal" }
+  .main-area
+    .top-bar
+      h1.top-bar-title Dashboard
+      .top-bar-actions
+        button.btn.btn-primary type="button" data-bs-toggle="modal" data-bs-target="#expenseModal" Add an expense
+        button.btn.btn-secondary type="button" data-bs-toggle="modal" data-bs-target="#settleUpModal" Settle up
+
+    .dashboard-balances
+      .dashboard-detail
+        .detail-block
+          h2.detail-title you owe
+          - @expenses_share_not.each do |share|
+            - amount = Friendship.find(share.to_i)&.amount_to_take
+            - if amount != 0.0
+              .user-detail
+                img.user-img alt="profile" src="https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png"
+                .user-info
+                  p= User.find(Friendship.find(share.to_i)&.user_id).name
+                  p= amount === 0.0 ? "amount settled" : amount
+
+        .detail-block
+          h2.detail-title you are owed
+          - @expenses_share.each do |share|
+            - amount = Friendship.find(share.to_i)&.amount_to_take
+            - if amount != 0.0
+              .user-detail.d-flex.justify-content-between
+                .user-detail
+                  img.user-img alt="profile" src="https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png"
+                  .user-info
+                    p= User.find(Friendship.find(share.to_i)&.friend_id).name
+                    p= amount === 0.0 ? "amount settled" : amount
+
+      .balances-bar
+        .balance-block
+          p total balance
+          p + $ #{@bal1 - @bal2}
+        .balance-block
+          p you owe
+          p $ #{@bal2}
+        .balance-block
+          p you are owed
+          p $ #{@bal1}
+
+= render partial: 'expense_modal'
+= render partial: 'settle_up_modal'
+= render partial: 'friends_modal'
+
+javascript:
+  document.addEventListener('DOMContentLoaded', function() {
+    const addUserButton = document.getElementById('addUserButton');
+    const dynamicFieldsContainer = document.getElementById('dynamicFieldsContainer');
+    const shareEquallyCheckbox = document.getElementById('sharedEqually1');
+    const amountInput = document.getElementById('expenseAmount');
+    let counter = 1;
+    const users = #{raw @user_friends.to_json};
+    const currentUserId = #{raw current_user.id};
+
+    function updateAmountFields() {
+      const totalUsers = dynamicFieldsContainer.querySelectorAll('select').length + 1;
+      if (shareEquallyCheckbox.checked && totalUsers > 0) {
+        const amountPerUser = parseFloat(amountInput.value) / totalUsers;
+        dynamicFieldsContainer.querySelectorAll('input[type="number"]').forEach(input => {
+          input.value = amountPerUser.toFixed(2);
+        });
+      }
+    }
+
+    shareEquallyCheckbox.addEventListener('change', updateAmountFields);
+
+    amountInput.addEventListener('input', updateAmountFields);
+
+    addUserButton.addEventListener('click', () => {
+      const newUserInput = document.createElement('select');
+      newUserInput.name = `expense_share[${counter}][user]`;
+      newUserInput.classList.add('form-select');
+      users.forEach(user => {
+        const option = document.createElement('option');
+        option.value = user.id;
+        option.textContent = user.name;
+        newUserInput.appendChild(option);
+      });
+
+      const newAmountInput = document.createElement('input');
+      newAmountInput.type = 'number';
+      newAmountInput.name = `expense_share[${counter}][amount]`;
+      newAmountInput.classList.add('form-control');
+
+      const removeButton = document.createElement('button');
+      removeButton.textContent = 'Remove User'; // Cross emoji for remove button
+      removeButton.type = 'button';
+      removeButton.classList.add('btn','btn-sm','my-2', 'btn-danger');
+      removeButton.addEventListener('click', () => {
+        newUserInput.remove();
+        newAmountInput.remove();
+        removeButton.remove();
+        updateAmountFields();
+      });
+
+      dynamicFieldsContainer.appendChild(newUserInput);
+      dynamicFieldsContainer.appendChild(newAmountInput);
+      dynamicFieldsContainer.appendChild(removeButton);
+
+      counter++;
+
+      if (shareEquallyCheckbox.checked) {
+        updateAmountFields();
+      }
+    });
+  });
