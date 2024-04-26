@@ -1,0 +1,18 @@
+<div class="modal fade" id="friendsModal" aria-hidden="true" aria-labelledby="friendsModalLabel" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="friendsModalLabel">Add friends</h5>
+        <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="friends-list">
+          <p class="friends-list-header">Select friends:</p>
+          <% @users.each do |user| %>
+            <%= link_to "#{user.name}", add_friend_path(user_id: user.id), method: :post, class: "friend-name" %><br>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

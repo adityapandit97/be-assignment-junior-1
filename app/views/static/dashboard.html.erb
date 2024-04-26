@@ -1,0 +1,143 @@
+<div class="dashboard-wrapper " style="margin-top:100px;">
+  <aside class="side-bar-area">
+    <div class="friends-list">
+      <p class="friends-list-header">FRIENDS</p>
+      <% @user.friends.each do |user| %>
+        <a href="people/<%=user.id%>" class="friend-name"><%= user.name %></a>
+      <% end %>
+    </div>
+    <%= link_to "Add friends", "#", class: "btn btn-primary", data: { bs_toggle: "modal", bs_target: "#friendsModal" } %>
+  </aside>
+  <div class="main-area">
+    <div class="top-bar">
+      <h1 class="top-bar-title">Dashboard</h1>
+      <div class="top-bar-actions">
+        <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#expenseModal">Add an expense</button>
+        <button class="btn btn-secondary" type="button" data-bs-toggle="modal" data-bs-target="#settleUpModal">Settle up</button>
+      </div>
+    </div>
+
+    <div class="dashboard-balances">
+     
+    <div class="dashboard-detail">
+      <div class="detail-block">
+        <h2 class="detail-title">you owe</h2>
+        <% @expenses_share_not.each do |share| %>
+         
+          <% amount = Friendship.find(share.to_i)&.amount_to_take %>
+          <% if amount != 0.0 %>
+            <div class="user-detail">
+              <img class="user-img" alt="profile" src="https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png" />
+              <div class="user-info">
+                <p><%= User.find(Friendship.find(share.to_i)&.user_id).name %></p>
+                <p><%= amount === 0.0 ? "amount settled" : amount %></p>
+              </div>    
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+      
+      <div class="detail-block">
+        <h2 class="detail-title">you are owed</h2>
+        <% @expenses_share.each do |share| %>
+          <% amount = Friendship.find(share.to_i)&.amount_to_take%>
+          <% if amount != 0.0 %>
+            <div class="user-detail d-flex justify-content-between">
+              <div class="user-detail">
+                <img class="user-img" alt="profile" src="https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png" />
+                <div class="user-info">
+                  <p><%= User.find(Friendship.find(share.to_i)&.friend_id).name %></p>
+                  <p><%= amount === 0.0 ? "amount settled" : amount %></p>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+
+       <div class="balances-bar">
+        <div class="balance-block">
+          <p>total balance</p>
+          <p>+ $ <%=@bal1 - @bal2%></p>
+        </div>
+        <div class="balance-block">
+          <p>you owe</p>
+          <p>$ <%= @bal2 %></p>
+        </div>
+        <div class="balance-block">
+          <p>you are owed</p>
+          <p>$ <%= @bal1 %></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<%= render partial: 'expense_modal' %>
+<%= render partial: 'settle_up_modal' %>
+<%= render partial: 'friends_modal' %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+  const addUserButton = document.getElementById('addUserButton');
+  const dynamicFieldsContainer = document.getElementById('dynamicFieldsContainer');
+  const shareEquallyCheckbox = document.getElementById('sharedEqually1');
+  const amountInput = document.getElementById('expenseAmount');
+  let counter = 1;
+  const users = <%= raw @user_friends.to_json %>;
+  const currentUserId = <%= raw current_user.id %>;
+
+  function updateAmountFields() {
+    const totalUsers = dynamicFieldsContainer.querySelectorAll('select').length + 1;
+    if (shareEquallyCheckbox.checked && totalUsers > 0) {
+      const amountPerUser = parseFloat(amountInput.value) / totalUsers;
+      dynamicFieldsContainer.querySelectorAll('input[type="number"]').forEach(input => {
+        input.value = amountPerUser.toFixed(2);
+      });
+    }
+  }
+
+  shareEquallyCheckbox.addEventListener('change', updateAmountFields);
+
+  amountInput.addEventListener('input', updateAmountFields);
+
+  addUserButton.addEventListener('click', () => {
+    const newUserInput = document.createElement('select');
+    newUserInput.name = `expense_share[${counter}][user]`;
+    newUserInput.classList.add('form-select');
+    users.forEach(user => {
+      const option = document.createElement('option');
+      option.value = user.id;
+      option.textContent = user.name;
+      newUserInput.appendChild(option);
+    });
+
+    const newAmountInput = document.createElement('input');
+    newAmountInput.type = 'number';
+    newAmountInput.name = `expense_share[${counter}][amount]`;
+    newAmountInput.classList.add('form-control');
+
+    const removeButton = document.createElement('button');
+    removeButton.textContent = 'Remove User'; // Cross emoji for remove button
+    removeButton.type = 'button';
+    removeButton.classList.add('btn','btn-sm','my-2', 'btn-danger');
+    removeButton.addEventListener('click', () => {
+      newUserInput.remove();
+      newAmountInput.remove();
+      removeButton.remove();
+      updateAmountFields();
+    });
+
+    dynamicFieldsContainer.appendChild(newUserInput);
+    dynamicFieldsContainer.appendChild(newAmountInput);
+    dynamicFieldsContainer.appendChild(removeButton);
+
+    counter++;
+
+    if (shareEquallyCheckbox.checked) {
+      updateAmountFields();
+    }
+  });
+});
+
+</script>

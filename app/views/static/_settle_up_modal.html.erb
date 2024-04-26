@@ -1,0 +1,29 @@
+
+<div class="modal fade" id="settleUpModal" aria-hidden="true" aria-labelledby="settleUpModalLabel" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="/settle_up" method="post">
+        <div class="modal-body">
+          <label for="friendDropdown">Select a Friend:</label>
+          <select class="form-select" id="friendDropdown" name="friendId">
+            <!-- Populate dropdown options dynamically with user's friends data -->
+            <% @user_friends.each do |friend| %>
+              <option value="<%= friend.id %>"><%= friend.name %></option>
+            <% end %>
+          </select>
+          <label for="amount">Amount:</label>
+          <input type="number" class="form-control" id="amount" name="amount" placeholder="Enter amount" required>
+          <label for="description">Description:</label>
+          <input type="text" class="form-control" id="description" name="description" placeholder="Enter description (optional)">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
